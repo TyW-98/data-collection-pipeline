@@ -7,7 +7,7 @@ from selenium import webdriver
 
 driver = webdriver.Chrome()
 driver.get("https://www.agoda.com/?cid=1844104")
-time.sleep(2)
+time.sleep(1)
 
 destination = "Penang"
 search_bar = driver.find_element(by = By.XPATH, value = '//*[@class = "SearchBoxTextEditor SearchBoxTextEditor--autocomplete"]')
