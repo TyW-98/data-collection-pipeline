@@ -13,12 +13,11 @@ class hotel_finder:
         self.pages = pages + 1
         self.hotel_list = []
         
-        if __name__ == "__main__":
-            self.load_main_page()
-            self.hotel_location_search()
-            self.page_scroller()
-            self.hotel_listing()
-            self.hotel_details()
+        self.load_main_page()
+        self.hotel_location_search()
+        self.page_scroller()
+        self.hotel_listing()
+        self.hotel_details()
     
     def load_main_page(self):
         self.driver = webdriver.Chrome()
@@ -93,10 +92,13 @@ class hotel_finder:
     
     def __str__(self):
         return f"Hotel finder for {self.holiday_location}"
+    
+if __name__ == "__main__":
+    destination = "Penang"
+    number_of_pages = 3
+    
+    penang_hotel = hotel_finder(destination, number_of_pages)
+    
+    print(penang_hotel)
+    
 
-destination = "Penang"
-number_of_pages = 3
-
-Penang_hotel = hotel_finder(destination,number_of_pages)
-
-print(Penang_hotel)
