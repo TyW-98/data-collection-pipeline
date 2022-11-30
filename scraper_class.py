@@ -39,17 +39,19 @@ class hotel_finder:
             driver.get(hotel)
             hotel_page = requests.get(hotel)
             hotel_page = BeautifulSoup(hotel_page.content, "html.parser")
-            print(hotel)
             hotel_name = driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-header-name"]').text
             hotel_rating = driver.find_elements(by = By.XPATH, value = '//h3[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 hTkvyT kite-js-Typography "]')[0].text
             self.hotel_dict["Hotel Name"].append(hotel_name)
             self.hotel_dict["Hotel URL"].append(hotel)
-            print(hotel_rating)
-            print(hotel_name)
+            self.hotel_dict["Hotel Rating"].append(hotel_rating)
             time.sleep(5)       
             
         return self.hotel_dict
+    
+    def __str__(self):
+        return f"Hotel finder for {self.holiday_location}"
 
 destination = "Penang"
 
-Penang_hotel = hotel_finder(destination).scraper()
+Penang_hotel = hotel_finder(destination)
+print(Penang_hotel)
