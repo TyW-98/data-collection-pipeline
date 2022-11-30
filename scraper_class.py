@@ -14,41 +14,60 @@ class hotel_finder:
         self.pages = pages + 1
         
     def scraper(self):
-        driver = webdriver.Chrome()
-        driver.get("https://www.agoda.com/?cid=1844104")
+        self.driver = webdriver.Chrome()
+        self.driver.get("https://www.agoda.com/?cid=1844104")
         time.sleep(10)
         
         try:
-            driver.find_elements(by= By.XPATH, value = '//button[@class = "ab-message-button"]')[1].click()
+            self.driver.find_elements(by= By.XPATH, value = '//button[@class = "ab-message-button"]')[1].click()
             time.sleep(2)
         except:
             pass        
         
-        search_bar = driver.find_element(by = By.XPATH, value = '//*[@class = "SearchBoxTextEditor SearchBoxTextEditor--autocomplete"]')
+        search_bar = self.driver.find_element(by = By.XPATH, value = '//*[@class = "SearchBoxTextEditor SearchBoxTextEditor--autocomplete"]')
         search_bar.send_keys(self.holiday_location)
-        driver.find_element(by = By.XPATH, value = '//button[@class = "Buttonstyled__ButtonStyled-sc-5gjk6l-0 hvHHEO Box-sc-kv6pi1-0 fDMIuA"]').click()
+        self.driver.find_element(by = By.XPATH, value = '//button[@class = "Buttonstyled__ButtonStyled-sc-5gjk6l-0 hvHHEO Box-sc-kv6pi1-0 fDMIuA"]').click()        
         time.sleep(10)
         
-        for n in range(self.pages):
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(30)
+        hotel_tick_box = self.driver.find_element(by = By.XPATH, value = '//*[@class="filter-item-info AccomdType-34 "]')
+        hotel_tick_box.find_element(by = By.CLASS_NAME, value = "checkbox-icon").click()
+        time.sleep(5)
+        resort_tick_box = self.driver.find_element(by = By.XPATH, value = '//*[@class = "filter-item-info AccomdType-37 "]')
+        resort_tick_box.find_element(by = By.CLASS_NAME, value = "checkbox-icon").click()
         
+        page_height = self.driver.execute_script("return document.body.scrollHeight")
         
+        while True:
+            
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            
+            time.sleep(6)
+            
+            new_height = self.driver.execute_script("return document.body.scrollHeight")
+            
+            if new_height == page_height:
+                
+                self.driver.execute_script("window.scrollTo(document.body.scrollHeight, 0);")
+                
+                break
+            
+            page_height = new_height
+            
         hotel_list = [] 
 
-        all_hotel = driver.find_elements(by = By.XPATH, value = '//*[@class ="PropertyCard__Link"]')
+        all_hotel = self.driver.find_elements(by = By.XPATH, value = '//*[@class ="PropertyCard__Link"]')
         for hotel in all_hotel:
             hotel_link = hotel.get_attribute("href")
             hotel_list.append(hotel_link)
             
         for hotel in hotel_list:
-            driver.get(hotel)
+            self.driver.get(hotel)
             hotel_page = requests.get(hotel)
             hotel_page = BeautifulSoup(hotel_page.content, "html.parser")
-            hotel_name = driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-header-name"]').text
-            hotel_rating = driver.find_elements(by = By.XPATH, value = '//h3[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 hTkvyT kite-js-Typography "]')[0].text
-            hotel_address = driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-address-map"]').text
-            ppn = driver.find_element(by =By.XPATH, value = '//strong[@data-ppapi = "room-price"]').text
+            hotel_name = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-header-name"]').text
+            hotel_rating = self.driver.find_elements(by = By.XPATH, value = '//h3[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 hTkvyT kite-js-Typography "]')[0].text
+            hotel_address = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-address-map"]').text
+            ppn = self.driver.find_element(by =By.XPATH, value = '//strong[@data-ppapi = "room-price"]').text
             self.hotel_dict["Hotel Name"].append(hotel_name)
             self.hotel_dict["Hotel URL"].append(hotel)
             self.hotel_dict["Hotel Rating"].append(hotel_rating)
