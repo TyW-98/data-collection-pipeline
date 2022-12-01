@@ -18,10 +18,11 @@ class hotel_finder:
         self.page_scroller()
         self.hotel_listing()
         self.hotel_details()
+        self.get_picture()
     
     def load_main_page(self):
         self.driver = webdriver.Chrome()
-        self.driver.get("https://www.agoda.com/?cid=1844104") 
+        self.driver.get("https://www.agoda.com/") 
         time.sleep(10)
         
         try:
@@ -36,6 +37,9 @@ class hotel_finder:
         search_bar.send_keys(self.holiday_location)
         self.driver.find_element(by = By.XPATH, value = '//button[@class = "Buttonstyled__ButtonStyled-sc-5gjk6l-0 hvHHEO Box-sc-kv6pi1-0 fDMIuA"]').click()        
         time.sleep(10)
+        
+        self.driver.find_element(by = By.XPATH, value = '//*[@class = "filter-btn more-less-btn"]').click()
+        time.sleep(2.5)
         
         hotel_tick_box = self.driver.find_element(by = By.XPATH, value = '//*[@class="filter-item-info AccomdType-34 "]')
         hotel_tick_box.find_element(by = By.CLASS_NAME, value = "checkbox-icon").click()
@@ -88,7 +92,19 @@ class hotel_finder:
             self.hotel_dict["Address"].append(hotel_address)
             self.hotel_dict["Price/Night"].append(price_per_night)
             print(price_per_night)
-            time.sleep(5)           
+            time.sleep(5)   
+            
+    def get_picture(self):
+        self.driver.find_element(by = By.XPATH, value = '//button[@class = "Buttonstyled__ButtonStyled-sc-5gjk6l-0 gmRkRz"]').click()
+        hotel_thumbnails = self.driver.find_elements(by = By.XPATH, value = '//*[@data-element-name = "hotel-gallery-thumbnail"]')
+        
+        for picture in hotel_thumbnails:
+            picture_url = picture.find_element(by = By.TAG_NAME, value = "img")    
+            picture_url.get_attribute("href")
+            
+        close_button = self.driver.find_element(by = By.XPATH, value = '//*[@class = "Box-sc-kv6pi1-0 hEdrrC"]')
+        close_button = close_button.find_element(by = By.XPATH, value = '//*[@class = "Buttonstyled__ButtonStyled-sc-5gjk6l-0 gmRkRz"]')
+        close_button.click()        
     
     def __str__(self):
         return f"Hotel finder for {self.holiday_location}"
