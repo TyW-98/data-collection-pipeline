@@ -95,12 +95,16 @@ class hotel_finder:
             time.sleep(5)   
             
     def get_picture(self):
+        
+        picture_url_list = []
+        
         self.driver.find_element(by = By.XPATH, value = '//button[@class = "Buttonstyled__ButtonStyled-sc-5gjk6l-0 gmRkRz"]').click()
         hotel_thumbnails = self.driver.find_elements(by = By.XPATH, value = '//*[@data-element-name = "hotel-gallery-thumbnail"]')
         
         for picture in hotel_thumbnails:
             picture_url = picture.find_element(by = By.TAG_NAME, value = "img")    
-            picture_url.get_attribute("href")
+            picture_url = picture_url.get_attribute("href")
+            picture_url_list.append(picture_url)
             
         close_button = self.driver.find_element(by = By.XPATH, value = '//*[@class = "Box-sc-kv6pi1-0 hEdrrC"]')
         close_button = close_button.find_element(by = By.XPATH, value = '//*[@class = "Buttonstyled__ButtonStyled-sc-5gjk6l-0 gmRkRz"]')
