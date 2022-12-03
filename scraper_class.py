@@ -1,6 +1,7 @@
 import requests 
 import time
 import datetime
+from calendar import monthrange
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -8,11 +9,11 @@ from selenium import webdriver
 
 class hotel_finder:
 
-    def __init__(self,holiday_location,start_date,number_of_days,pages):
+    def __init__(self,holiday_location,start_date,number_of_nights,pages):
         self.hotel_dict = {"Hotel Name" : [], "Hotel Rating" : [], "Price/Night" : [], "Address": [], "Hotel URL": []}
         self.holiday_location = holiday_location
         self.start_date = start_date
-        self.number_of_days = number_of_days
+        self.number_of_nights = number_of_nights
         self.pages = pages + 1
         self.hotel_list = []
         
@@ -123,14 +124,23 @@ class hotel_finder:
         
         for months in all_months:
             current_month = months.text
-            print(current_month)
+            total_number_of_days = monthrange(int(selected_year),month_dict[current_month[:3]])
+            print(total_number_of_days)
             if selected_month == current_month[:3]:
-                date_label = f"{weekday} {selected_month} {selected_day} {selected_year}"               
-                print(f"Successfully selected date {date_label}")
-                self.driver.find_element(by = By.XPATH['//*[contains(@aria-label,'date_label')'])
-                break
+                days_element = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "PriceSurgePicker-Day__label PriceSurgePicker-Day__label--wide"]')
+                for days in days_element[:total_number_of_days[1]-1]:
+                    if days.text == selected_day:
+                        print(days.text)
+                        days_parent = days.find_element(by = By.XPATH, value = '..')  
+                        days_parent = days_parent.find_element(by = By.XPATH, value = '..')
+                        days_parent = days_parent.find_element(by = By.XPATH, value = '..')
+                        self.driver.execute_script("arguments[0].setAttribute('aria-selected','true')", days_parent)
+                        time.sleep(10)
+                        print(days_parent)           
+                #date_label = f"{weekday} {selected_month} {selected_day} {selected_year}"               
+                #print(f"Successfully selected date {date_label}")
             else:
-                break
+                pass
              
             
     def get_picture(self):
@@ -156,9 +166,9 @@ if __name__ == "__main__":
     destination = "Penang"
     number_of_pages = 3
     start_date = "20/12/2022"
-    number_of_days = 4
+    number_of_nights = 4
     
-    penang_hotel = hotel_finder(destination,start_date, number_of_days ,number_of_pages)
+    penang_hotel = hotel_finder(destination,start_date, number_of_nights ,number_of_pages)
     
     print(penang_hotel)
     
