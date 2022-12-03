@@ -7,3 +7,4 @@ This project builds a scraper to collect data from [Agoda's website](https://www
 
 ## __Milestone 2__ 
 * Select which website to collect data from, in this case [Agoda](https://www.agoda.com) was chosen.
+

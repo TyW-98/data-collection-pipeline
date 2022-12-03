@@ -127,6 +127,7 @@ class hotel_finder:
             if selected_month == current_month[:3]:
                 date_label = f"{weekday} {selected_month} {selected_day} {selected_year}"               
                 print(f"Successfully selected date {date_label}")
+                self.driver.find_element(by = By.XPATH['//*[contains(@aria-label,'date_label')'])
                 break
             else:
                 break
