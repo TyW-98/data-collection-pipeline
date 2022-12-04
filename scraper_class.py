@@ -117,28 +117,29 @@ class hotel_finder:
         month_dict = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6, "Jul": 7, "Aug": 8 , "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12}
         week_dict = {"Mon": 0, "Tue": 1, "Wed": 2, "Thu": 3, "Fri": 4, "Sat": 5, "Sun": 6}
         
-        selected_day, selected_month, selected_year = (n for n in self.start_date.split("/"))
-        weekday = datetime.date(year = int(selected_year), month = int(selected_month), day = int(selected_day)).weekday()
+        selected_start_date, selected_month, selected_year = (n for n in self.start_date.split("/"))
+        selected_end_date = int(selected_start_date) + number_of_nights
+        weekday = datetime.date(year = int(selected_year), month = int(selected_month), day = int(selected_start_date)).weekday()
         selected_month = list(month_dict.keys())[list(month_dict.values()).index(int(selected_month))]
         weekday = list(week_dict.keys())[list(week_dict.values()).index(weekday)]
         
         for months in all_months:
             current_month = months.text
             total_number_of_days = monthrange(int(selected_year),month_dict[current_month[:3]])
-            print(total_number_of_days)
-            if selected_month == current_month[:3]:
+            #date_label = f"{weekday} {selected_month} {selected_start_date} {selected_year}"               
+            if selected_month == current_month[:3] and int(selected_year) == int(current_month[-4:]):
                 days_element = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "PriceSurgePicker-Day__label PriceSurgePicker-Day__label--wide"]')
                 for days in days_element[:total_number_of_days[1]-1]:
-                    if days.text == selected_day:
-                        print(days.text)
+                    print(days.text)
+                    if days.text == selected_start_date or days.text == selected_end_date:
                         days_parent = days.find_element(by = By.XPATH, value = '..')  
                         days_parent = days_parent.find_element(by = By.XPATH, value = '..')
                         days_parent = days_parent.find_element(by = By.XPATH, value = '..')
-                        self.driver.execute_script("arguments[0].setAttribute('aria-selected','true')", days_parent)
-                        time.sleep(10)
-                        print(days_parent)           
-                #date_label = f"{weekday} {selected_month} {selected_day} {selected_year}"               
-                #print(f"Successfully selected date {date_label}")
+                        days_parent.click()
+                        time.sleep(15)   
+                        continue
+                    else:
+                        pass
             else:
                 pass
              
