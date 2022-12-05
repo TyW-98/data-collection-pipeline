@@ -3,6 +3,7 @@ import time
 import datetime
 import os
 import json
+import urllib.request
 from calendar import monthrange
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
@@ -19,6 +20,9 @@ class hotel_finder:
         self.pages = pages + 1
         self.hotel_list = []
         self.hotel_id_list = []
+        self.working_directory = os.path.dirname(os.path.realpath(__file__)).replace('\\',"/")
+        self.working_directory = self.working_directory[:self.working_directory.find(":")] + ":/" + self.working_directory[self.working_directory.find(":")+1:]
+        print(self.working_directory)
         
         self.load_main_page()
         self.hotel_location_search()
@@ -148,17 +152,15 @@ class hotel_finder:
             
             for detail, dict_key in zip(details_list, hotel_dict_keys[:7]):
                 self.hotel_dict[dict_key].append(detail)
-                
-            # self.hotel_dict["Hotel ID"].append(hotel_id)
-            # self.hotel_dict["Hotel Name"].append(hotel_name)
-            # self.hotel_dict["Hotel URL"].append(hotel)
-            # self.hotel_dict["Hotel Rating"].append(hotel_rating)
-            # self.hotel_dict["Address"].append(hotel_address)
-            # self.hotel_dict["Price/Night"].append(hotel_price_per_night)
-        
+            
+            global full_path
+            
+            folder_name = f"{hotel_name} ({hotel_id})"
+            full_path = f"{self.working_directory}/raw data/{self.holiday_location}/{folder_name}"
+            
             self.get_picture()
             
-            self.save_data(hotel_name,hotel_id,self.hotel_dict)
+            self.save_data(self.hotel_dict)
             
             print(hotel_price_per_night)
             print(self.hotel_dict)
@@ -166,9 +168,10 @@ class hotel_finder:
             time.sleep(5)  
             
     def get_current_time(self):
-        
         current_time = datetime.datetime.now().replace(microsecond=0).isoformat()
         self.hotel_dict["Time Scraped"].append(current_time)
+        
+        return current_time
                  
             
     def get_picture(self):
@@ -184,18 +187,29 @@ class hotel_finder:
         
         hotel_thumbnails = self.driver.find_elements(by = By.XPATH, value = '//*[@data-element-name = "hotel-gallery-thumbnail"]')
         
-        for picture in hotel_thumbnails:
+        for n, picture in enumerate(hotel_thumbnails):
             picture_url = picture.find_element(by = By.TAG_NAME, value = "img")    
             picture_url = picture_url.get_attribute("src")
+            #self.download_picture(picture_url,n)
             hotel_picture_url_list.append(picture_url)   
             
         self.hotel_dict["Hotel Pictures"].append(hotel_picture_url_list)
-    
-    def save_data(self,hotel_name,hotel_id,current_hotel_dict):
-        folder_name = f"{hotel_name} ({hotel_id})"
-        working_directory = os.path.dirname(os.path.realpath(__file__))
-        full_path = f"{working_directory}/raw data/{self.holiday_location}/{folder_name}"
-        print(working_directory)
+          
+    def download_picture(self, picture_url, image_number):
+        image_folder_dir = f"{full_path}/images"
+        if not os.path.exists(image_folder_dir):
+            os.makedirs(image_folder_dir)
+            
+        current_time = self.get_current_time()
+        current_date = current_time.split("T")[0]
+        current_time = current_time.split("T")[1]
+        
+        image_dir = f"{image_folder_dir}/{current_date}_{current_time}_{image_number}.png"
+        
+        urllib.request.urlretrieve(picture_url,image_dir)
+
+    def save_data(self,current_hotel_dict):
+
         if not os.path.exists(full_path):
             os.makedirs(full_path)
         
