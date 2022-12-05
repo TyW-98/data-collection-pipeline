@@ -10,12 +10,13 @@ from selenium import webdriver
 class hotel_finder:
 
     def __init__(self,holiday_location,start_date,number_of_nights,pages):
-        self.hotel_dict = {"Hotel Name" : [], "Hotel Rating" : [], "Price/Night" : [], "Address": [], "Hotel URL": []}
+        self.hotel_dict = {"Hotel ID": [],"Hotel Name" : [], "Hotel Rating" : [], "Price/Night" : [], "Address": [], "Hotel URL": [],"Hotel Pictures": [],"Time Scraped": []}
         self.holiday_location = holiday_location
         self.start_date = start_date
         self.number_of_nights = number_of_nights
         self.pages = pages + 1
         self.hotel_list = []
+        self.hotel_id_list = []
         
         self.load_main_page()
         self.hotel_location_search()
@@ -24,7 +25,9 @@ class hotel_finder:
         self.hotel_details()
     
     def load_main_page(self):
-        self.driver = webdriver.Chrome()
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument("start-maximized")
+        self.driver = webdriver.Chrome(options = chrome_options)
         self.driver.get("https://www.agoda.com/") 
         time.sleep(10)
         
@@ -39,9 +42,9 @@ class hotel_finder:
         search_bar = self.driver.find_element(by = By.XPATH, value = '//*[@class = "SearchBoxTextEditor SearchBoxTextEditor--autocomplete"]')
         search_bar.send_keys(self.holiday_location)
         
-        time.sleep(2.5)
-        search_bar.send_keys(Keys.ENTER)
-        self.set_date()
+        #time.sleep(2.5)
+        #search_bar.send_keys(Keys.ENTER)
+        #self.set_date()
         
         self.driver.find_element(by = By.XPATH, value = '//button[@class = "Buttonstyled__ButtonStyled-sc-5gjk6l-0 hvHHEO Box-sc-kv6pi1-0 fDMIuA"]').click()        
         time.sleep(10)
@@ -51,62 +54,11 @@ class hotel_finder:
         
         hotel_tick_box = self.driver.find_element(by = By.XPATH, value = '//*[@class="filter-item-info AccomdType-34 "]')
         hotel_tick_box.find_element(by = By.CLASS_NAME, value = "checkbox-icon").click()
-        time.sleep(10)
+        time.sleep(3)
         resort_tick_box = self.driver.find_element(by = By.XPATH, value = '//*[@class = "filter-item-info AccomdType-37 "]')
         resort_tick_box.find_element(by = By.CLASS_NAME, value = "checkbox-icon").click()
         time.sleep(10)
-            
-    def page_scroller(self):
         
-        page_height = self.driver.execute_script("return document.body.scrollHeight")
-        
-        while True:
-            
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            
-            time.sleep(6)
-            
-            new_height = self.driver.execute_script("return document.body.scrollHeight")
-            
-            if new_height == page_height:
-                
-                self.driver.execute_script("window.scrollTo(document.body.scrollHeight, 0);")
-                
-                break
-            
-            page_height = new_height
-            
-    def hotel_listing(self):
-
-        all_hotel = self.driver.find_elements(by = By.XPATH, value = '//*[@class ="PropertyCard__Link"]')
-        
-        for hotel in all_hotel:
-            hotel_link = hotel.get_attribute("href")
-            self.hotel_list.append(hotel_link)
-            
-            
-    def hotel_details(self):
-        
-         for hotel in self.hotel_list:
-            self.driver.get(hotel)
-            hotel_page = requests.get(hotel)
-            time.sleep(10)
-            hotel_page = BeautifulSoup(hotel_page.content, "html.parser")
-            hotel_name = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-header-name"]').text
-            hotel_rating = self.driver.find_elements(by = By.XPATH, value = '//h3[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 hTkvyT kite-js-Typography "]')[0].text
-            hotel_address = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-address-map"]').text
-            price_per_night = self.driver.find_element(by =By.XPATH, value = '//strong[@data-ppapi = "room-price"]').text
-            self.hotel_dict["Hotel Name"].append(hotel_name)
-            self.hotel_dict["Hotel URL"].append(hotel)
-            self.hotel_dict["Hotel Rating"].append(hotel_rating)
-            self.hotel_dict["Address"].append(hotel_address)
-            self.hotel_dict["Price/Night"].append(price_per_night)
-        
-            self.get_picture()
-            
-            print(price_per_night)
-            time.sleep(5)  
-            
     def set_date(self) :
         
         #self.driver.find_element(by = By.XPATH, value = '//*[@class = "IconBox IconBox--checkIn"]').click()
@@ -142,23 +94,91 @@ class hotel_finder:
                         pass
             else:
                 pass
-             
+            
+    def page_scroller(self):
+        
+        page_height = self.driver.execute_script("return document.body.scrollHeight")
+        
+        while True:
+            
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            
+            time.sleep(6)
+            
+            new_height = self.driver.execute_script("return document.body.scrollHeight")
+            
+            if new_height == page_height:
+                
+                self.driver.execute_script("window.scrollTo(document.body.scrollHeight, 0);")
+                
+                break
+            
+            page_height = new_height
+            
+    def hotel_listing(self):
+
+        all_hotel = self.driver.find_elements(by = By.XPATH, value = '//*[@class ="PropertyCard__Link"]')
+        all_hotel_id = self.driver.find_elements(by = By.XPATH, value = '//*[@data-selenium = "hotel-item"]')
+        
+        for hotel, hotel_id in zip(all_hotel, all_hotel_id):
+            hotel_link = hotel.get_attribute("href")
+            self.hotel_list.append(hotel_link)
+            self.hotel_id_list.append(hotel_id.get_attribute("data-hotelid"))
+            
+            
+    def hotel_details(self):
+        
+         for n , hotel in enumerate(self.hotel_list):
+            self.driver.get(hotel)
+            hotel_page = requests.get(hotel)
+            time.sleep(10)
+            hotel_page = BeautifulSoup(hotel_page.content, "html.parser")    
+            
+            self.get_current_time()
+                    
+            hotel_name = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-header-name"]').text
+            hotel_rating = self.driver.find_elements(by = By.XPATH, value = '//h3[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 hTkvyT kite-js-Typography "]')[0].text
+            hotel_address = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-address-map"]').text
+            price_per_night = self.driver.find_element(by =By.XPATH, value = '//strong[@data-ppapi = "room-price"]').text
+            self.hotel_dict["Hotel ID"].append(self.hotel_id_list[n])
+            self.hotel_dict["Hotel Name"].append(hotel_name)
+            self.hotel_dict["Hotel URL"].append(hotel)
+            self.hotel_dict["Hotel Rating"].append(hotel_rating)
+            self.hotel_dict["Address"].append(hotel_address)
+            self.hotel_dict["Price/Night"].append(price_per_night)
+        
+            self.get_picture()
+            
+            print(price_per_night)
+            print(self.hotel_dict)
+    
+            time.sleep(5)  
+            
+    def get_current_time(self):
+        
+        current_time = datetime.datetime.now().replace(microsecond=0).isoformat()
+        self.hotel_dict["Time Scraped"].append(current_time)
+                 
             
     def get_picture(self):
         
         time.sleep(10)
         
-        picture_url_list = []
+        hotel_picture_url_list = []
         
-        self.driver.find_element(by = By.XPATH, value = '//button[@class = "Buttonstyled__ButtonStyled-sc-5gjk6l-0 gmRkRz"]').click()
-        time.sleep(30)
+        see_all_pictures_button = self.driver.find_element(by = By.XPATH, value = '//*[@data-element-name = "hotel-mosaic-see-all-photos"]')
+        see_all_pictures_button.find_element(by = By.TAG_NAME, value = "button").click()
+                                                           
+        time.sleep(15)
         
         hotel_thumbnails = self.driver.find_elements(by = By.XPATH, value = '//*[@data-element-name = "hotel-gallery-thumbnail"]')
         
         for picture in hotel_thumbnails:
             picture_url = picture.find_element(by = By.TAG_NAME, value = "img")    
-            picture_url = picture_url.get_attribute("href")
-            picture_url_list.append(picture_url)   
+            picture_url = picture_url.get_attribute("src")
+            hotel_picture_url_list.append(picture_url)   
+            
+        self.hotel_dict["Hotel Pictures"].append(hotel_picture_url_list)
     
     def __str__(self):
         return f"Hotel finder for {self.holiday_location}"
