@@ -1,6 +1,8 @@
 import requests 
 import time
 import datetime
+import os
+import json
 from calendar import monthrange
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
@@ -101,7 +103,7 @@ class hotel_finder:
         
         while True:
             
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight-1);")
             
             time.sleep(6)
             
@@ -135,12 +137,13 @@ class hotel_finder:
             hotel_page = BeautifulSoup(hotel_page.content, "html.parser")    
             
             self.get_current_time()
-                    
+            
+            hotel_id = self.hotel_id_list[n]       
             hotel_name = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-header-name"]').text
             hotel_rating = self.driver.find_elements(by = By.XPATH, value = '//h3[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 hTkvyT kite-js-Typography "]')[0].text
             hotel_address = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-address-map"]').text
             price_per_night = self.driver.find_element(by =By.XPATH, value = '//strong[@data-ppapi = "room-price"]').text
-            self.hotel_dict["Hotel ID"].append(self.hotel_id_list[n])
+            self.hotel_dict["Hotel ID"].append(hotel_id)
             self.hotel_dict["Hotel Name"].append(hotel_name)
             self.hotel_dict["Hotel URL"].append(hotel)
             self.hotel_dict["Hotel Rating"].append(hotel_rating)
@@ -148,6 +151,8 @@ class hotel_finder:
             self.hotel_dict["Price/Night"].append(price_per_night)
         
             self.get_picture()
+            
+            self.save_data(hotel_name,hotel_id,self.hotel_dict)
             
             print(price_per_night)
             print(self.hotel_dict)
@@ -180,6 +185,17 @@ class hotel_finder:
             
         self.hotel_dict["Hotel Pictures"].append(hotel_picture_url_list)
     
+    def save_data(self,hotel_name,hotel_id,current_hotel_dict):
+        folder_name = f"{hotel_name} ({hotel_id})"
+        working_directory = os.path.dirname(os.path.realpath(__file__))
+        full_path = f"{working_directory}/raw data/{self.holiday_location}/{folder_name}"
+        print(working_directory)
+        if not os.path.exists(full_path):
+            os.makedirs(full_path)
+        
+        with open(f"{full_path}/data.json", "w") as json_file:
+            json.dump(current_hotel_dict,json_file)
+
     def __str__(self):
         return f"Hotel finder for {self.holiday_location}"
     
