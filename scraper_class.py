@@ -142,19 +142,25 @@ class hotel_finder:
             hotel_name = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-header-name"]').text
             hotel_rating = self.driver.find_elements(by = By.XPATH, value = '//h3[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 hTkvyT kite-js-Typography "]')[0].text
             hotel_address = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-address-map"]').text
-            price_per_night = self.driver.find_element(by =By.XPATH, value = '//strong[@data-ppapi = "room-price"]').text
-            self.hotel_dict["Hotel ID"].append(hotel_id)
-            self.hotel_dict["Hotel Name"].append(hotel_name)
-            self.hotel_dict["Hotel URL"].append(hotel)
-            self.hotel_dict["Hotel Rating"].append(hotel_rating)
-            self.hotel_dict["Address"].append(hotel_address)
-            self.hotel_dict["Price/Night"].append(price_per_night)
+            hotel_price_per_night = self.driver.find_element(by =By.XPATH, value = '//strong[@data-ppapi = "room-price"]').text
+            details_list = [hotel_id, hotel_name, hotel_rating, hotel_address, hotel_price_per_night]
+            hotel_dict_keys = list(self.hotel_dict.keys())
+            
+            for detail, dict_key in zip(details_list, hotel_dict_keys[:7]):
+                self.hotel_dict[dict_key].append(detail)
+                
+            # self.hotel_dict["Hotel ID"].append(hotel_id)
+            # self.hotel_dict["Hotel Name"].append(hotel_name)
+            # self.hotel_dict["Hotel URL"].append(hotel)
+            # self.hotel_dict["Hotel Rating"].append(hotel_rating)
+            # self.hotel_dict["Address"].append(hotel_address)
+            # self.hotel_dict["Price/Night"].append(hotel_price_per_night)
         
             self.get_picture()
             
             self.save_data(hotel_name,hotel_id,self.hotel_dict)
             
-            print(price_per_night)
+            print(hotel_price_per_night)
             print(self.hotel_dict)
     
             time.sleep(5)  
