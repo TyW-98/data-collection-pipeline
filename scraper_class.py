@@ -5,7 +5,6 @@ import os
 import json
 import shutil
 from calendar import monthrange
-from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
@@ -21,7 +20,6 @@ class hotel_finder:
         self.hotel_list = []
         self.hotel_id_list = []
         self.working_directory = os.path.dirname(os.path.realpath(__file__)).replace('\\',"/")
-        
         
         self.load_main_page()
         self.hotel_location_search()
@@ -58,9 +56,9 @@ class hotel_finder:
         self.driver.find_element(by = By.XPATH, value = '//button[@class = "Buttonstyled__ButtonStyled-sc-5gjk6l-0 hvHHEO Box-sc-kv6pi1-0 fDMIuA"]').click()        
         time.sleep(5)
         
-        min_price_box = self.driver.find_element(by = By.XPATH, value = '//*[@id = "price_box_0"]')
-        min_price_box.send_keys("10")
-        time.sleep(2)
+        # min_price_box = self.driver.find_element(by = By.XPATH, value = '//*[@id = "price_box_0"]')
+        # min_price_box.send_keys("10")
+        # time.sleep(2)
         
         self.driver.find_element(by = By.XPATH, value = '//*[@class = "filter-btn more-less-btn"]').click()
         time.sleep(2.5)
@@ -114,7 +112,9 @@ class hotel_finder:
         
         while True:
             
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight-1);")
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(2)
+            self.driver.execute_script("window.scrollTo(document.body.scrollHeight, document.body.scrollHeight/2);")
             
             time.sleep(6)
             
@@ -141,43 +141,47 @@ class hotel_finder:
             
     def hotel_details(self):
         
-         for hotel_number , hotel in enumerate(self.hotel_list):
+        hotel_dict_keys = list(self.hotel_dict.keys())
+        
+        for hotel_number , hotel in enumerate(self.hotel_list):
+            individual_hotel_dict = dict.fromkeys(hotel_dict_keys, 0)
             self.driver.get(hotel)
             hotel_page = requests.get(hotel)
-            time.sleep(6)
-            hotel_page = BeautifulSoup(hotel_page.content, "html.parser")    
+            time.sleep(6) 
             
             current_time = self.get_current_time()
             self.hotel_dict["Time Scraped"].append(current_time)
+            individual_hotel_dict["Time Scraped"] = current_time
             
             hotel_id = self.hotel_id_list[hotel_number]       
             hotel_name = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-header-name"]').text
             hotel_rating = self.driver.find_elements(by = By.XPATH, value = '//h3[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 hTkvyT kite-js-Typography "]')[0].text
             hotel_address = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-address-map"]').text
-            check_hotel_avaliability = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "RoomGrid-searchTimeOutText"]')
-            print(check_hotel_avaliability)
+            check_hotel_room_avaliability = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "RoomGrid-searchTimeOutText"]')
             
-            if check_hotel_avaliability == []:
+            if check_hotel_room_avaliability == []:
                 hotel_price_per_night = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "Box-sc-kv6pi1-0 hRUYUu StickyNavPrice__priceDetail--lowerText StickyNavPrice__priceDetail--defaultColor"]')
                 hotel_price_per_night = hotel_price_per_night[1].text.split(self.currency)[1]
-            elif "no rooms" in check_hotel_avaliability[0].text:
+            elif "no rooms" in check_hotel_room_avaliability[0].text:
                 hotel_price_per_night = "No rooms avaliable"
             
             hotel_url = self.driver.current_url
             details_list = [hotel_id, hotel_name, hotel_rating, hotel_price_per_night, hotel_address, hotel_url]
-            hotel_dict_keys = list(self.hotel_dict.keys())
             
             for detail, dict_key in zip(details_list, hotel_dict_keys[:7]):
                 self.hotel_dict[dict_key].append(detail)
+                individual_hotel_dict[dict_key] = detail
             
             global full_path
             
-            folder_name = f"{hotel_name} ({hotel_id})"
+            folder_name = f"{hotel_name} (hotel ID - {hotel_id})"
             full_path = f"{self.working_directory}/raw data/{self.holiday_location}/{folder_name}"
             
-            self.get_picture()
+            picture_url_list = self.get_picture()
             
-            self.save_data(self.hotel_dict)
+            individual_hotel_dict["Hotel Pictures"] = picture_url_list
+            
+            self.save_data(individual_hotel_dict)
             
             print(hotel_price_per_night)
             print(self.hotel_dict)
@@ -210,6 +214,8 @@ class hotel_finder:
             hotel_picture_url_list.append(picture_url)   
             
         self.hotel_dict["Hotel Pictures"].append(hotel_picture_url_list)
+        
+        return hotel_picture_url_list
           
     def download_picture(self, picture_url, image_number):
         image_folder_dir = f"{full_path}/images"
@@ -243,7 +249,7 @@ class hotel_finder:
         return f"Hotel finder for {self.holiday_location}"
     
 if __name__ == "__main__":
-    destination = "Penang"
+    destination = "London"
     number_of_pages = 3
     start_date = "20/12/2022"
     number_of_nights = 4
