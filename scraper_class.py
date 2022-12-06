@@ -249,12 +249,12 @@ class hotel_finder:
         return f"Hotel finder for {self.holiday_location}"
     
 if __name__ == "__main__":
-    destination = "London"
+    destination = "Paris"
     number_of_pages = 3
     start_date = "20/12/2022"
     number_of_nights = 4
     
-    penang_hotel = hotel_finder(destination,start_date, number_of_nights ,number_of_pages)
+    all_hotels = hotel_finder(destination,start_date, number_of_nights ,number_of_pages)
     
-    print(penang_hotel)
+    print(all_hotels)
     
