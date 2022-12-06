@@ -21,8 +21,7 @@ class hotel_finder:
         self.hotel_list = []
         self.hotel_id_list = []
         self.working_directory = os.path.dirname(os.path.realpath(__file__)).replace('\\',"/")
-        #self.working_directory = self.working_directory[:self.working_directory.find(":")] + ":" + self.working_directory[self.working_directory.find(":")+1:]
-        print(self.working_directory)
+        
         
         self.load_main_page()
         self.hotel_location_search()
@@ -36,13 +35,15 @@ class hotel_finder:
         chrome_options.add_argument("start-maximized")
         self.driver = webdriver.Chrome(options = chrome_options)
         self.driver.get("https://www.agoda.com/") 
-        time.sleep(10)
+        time.sleep(7)
         
         try:
             self.driver.find_elements(by= By.XPATH, value = '//button[@class = "ab-message-button"]')[1].click()   
             time.sleep(2)
         except:
             pass
+        
+        self.currency = self.driver.find_element(by = By.XPATH, value = '//p[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 gSVfcd kite-js-Typography CurrencyContainer__SelectedCurrency__Symbol"]').text
         
     def hotel_location_search(self):
             
@@ -51,10 +52,15 @@ class hotel_finder:
         
         #time.sleep(2.5)
         #search_bar.send_keys(Keys.ENTER)
+        
         #self.set_date()
         
         self.driver.find_element(by = By.XPATH, value = '//button[@class = "Buttonstyled__ButtonStyled-sc-5gjk6l-0 hvHHEO Box-sc-kv6pi1-0 fDMIuA"]').click()        
-        time.sleep(10)
+        time.sleep(5)
+        
+        min_price_box = self.driver.find_element(by = By.XPATH, value = '//*[@id = "price_box_0"]')
+        min_price_box.send_keys("10")
+        time.sleep(2)
         
         self.driver.find_element(by = By.XPATH, value = '//*[@class = "filter-btn more-less-btn"]').click()
         time.sleep(2.5)
@@ -135,7 +141,7 @@ class hotel_finder:
             
     def hotel_details(self):
         
-         for n , hotel in enumerate(self.hotel_list):
+         for hotel_number , hotel in enumerate(self.hotel_list):
             self.driver.get(hotel)
             hotel_page = requests.get(hotel)
             time.sleep(6)
@@ -144,12 +150,21 @@ class hotel_finder:
             current_time = self.get_current_time()
             self.hotel_dict["Time Scraped"].append(current_time)
             
-            hotel_id = self.hotel_id_list[n]       
+            hotel_id = self.hotel_id_list[hotel_number]       
             hotel_name = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-header-name"]').text
             hotel_rating = self.driver.find_elements(by = By.XPATH, value = '//h3[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 hTkvyT kite-js-Typography "]')[0].text
             hotel_address = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-address-map"]').text
-            hotel_price_per_night = self.driver.find_element(by =By.XPATH, value = '//strong[@data-ppapi = "room-price"]').text
-            details_list = [hotel_id, hotel_name, hotel_rating, hotel_address, hotel_price_per_night]
+            check_hotel_avaliability = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "RoomGrid-searchTimeOutText"]')
+            print(check_hotel_avaliability)
+            
+            if check_hotel_avaliability == []:
+                hotel_price_per_night = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "Box-sc-kv6pi1-0 hRUYUu StickyNavPrice__priceDetail--lowerText StickyNavPrice__priceDetail--defaultColor"]')
+                hotel_price_per_night = hotel_price_per_night[1].text.split(self.currency)[1]
+            elif "no rooms" in check_hotel_avaliability[0].text:
+                hotel_price_per_night = "No rooms avaliable"
+            
+            hotel_url = self.driver.current_url
+            details_list = [hotel_id, hotel_name, hotel_rating, hotel_price_per_night, hotel_address, hotel_url]
             hotel_dict_keys = list(self.hotel_dict.keys())
             
             for detail, dict_key in zip(details_list, hotel_dict_keys[:7]):
@@ -188,10 +203,10 @@ class hotel_finder:
         
         hotel_thumbnails = self.driver.find_elements(by = By.XPATH, value = '//*[@data-element-name = "hotel-gallery-thumbnail"]')
         
-        for n, picture in enumerate(hotel_thumbnails):
+        for picture_number, picture in enumerate(hotel_thumbnails):
             picture_url = picture.find_element(by = By.TAG_NAME, value = "img")    
             picture_url = picture_url.get_attribute("src")
-            self.download_picture(picture_url,n)
+            self.download_picture(picture_url,picture_number)
             hotel_picture_url_list.append(picture_url)   
             
         self.hotel_dict["Hotel Pictures"].append(hotel_picture_url_list)
