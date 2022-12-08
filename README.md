@@ -102,3 +102,69 @@ def hotel_listing(self):
             self.hotel_list.append(hotel_link)
             self.hotel_id_list.append(hotel_id.get_attribute("data-hotelid"))
 ```
+
+* Once all the listed hotel's url are collected, a method named `hotel_details` is used to get the following information from each hotel's page:
+  * Unique listing ID
+  * Name of the hotel
+  * Rating of the hotel
+  * The base price per night
+  * Hotel's address
+  * The associated URL for the hotel
+  * All the picture sources 
+  * The time the page was scraped
+*  Sometimes a deal might have just ended and the associated hotel's page will not show any prices. To overcome this, an `if` statement is used to check 
+
+```go
+def hotel_details(self):
+        
+        hotel_dict_keys = list(self.hotel_dict.keys())
+        
+        for hotel_number , hotel in enumerate(self.hotel_list):
+            individual_hotel_dict = dict.fromkeys(hotel_dict_keys, 0)
+            self.driver.get(hotel)
+            hotel_page = requests.get(hotel)
+            time.sleep(6) 
+            
+            current_time = self.get_current_time()
+            self.hotel_dict["Time Scraped"].append(current_time)
+            individual_hotel_dict["Time Scraped"] = current_time
+            
+            hotel_id = self.hotel_id_list[hotel_number]       
+            hotel_name = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-header-name"]').text
+            hotel_rating = self.driver.find_elements(by = By.XPATH, value = '//h3[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 hTkvyT kite-js-Typography "]')[0].text
+            hotel_address = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-address-map"]').text
+            check_hotel_room_avaliability = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "RoomGrid-searchTimeOutText"]')
+
+            if check_hotel_room_avaliability == []:
+                hotel_price_per_night = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "Box-sc-kv6pi1-0 hRUYUu StickyNavPrice__priceDetail--lowerText StickyNavPrice__priceDetail--defaultColor"]')
+                hotel_price_per_night = hotel_price_per_night[1].text.split(self.currency)[1]
+            elif "no rooms" in check_hotel_room_avaliability[0].text:
+                hotel_price_per_night = "No rooms avaliable"
+            
+            hotel_url = self.driver.current_url
+            details_list = [hotel_id, hotel_name, hotel_rating, hotel_price_per_night, hotel_address, hotel_url]
+            
+            for detail, dict_key in zip(details_list, hotel_dict_keys[:7]):
+                self.hotel_dict[dict_key].append(detail)
+                individual_hotel_dict[dict_key] = detail
+
+        individual_hotel_dict["Hotel Pictures"] = picture_url_list
+
+        time.sleep(5)
+```
+
+* To have the `hotel_finder` class run directly when the code is being run, the class is being initialised within the `if __name__ == "__main__"` block.
+
+```go
+if __name__ == "__main__":
+    destination = "Paris"
+    number_of_pages = 3
+    start_date = "20/12/2022"
+    number_of_nights = 4
+    
+    all_hotels = hotel_finder(destination,start_date, number_of_nights ,number_of_pages)
+    
+    print(all_hotels)
+```
+
+## __Milestone 4__
