@@ -103,7 +103,7 @@ def hotel_listing(self):
             self.hotel_id_list.append(hotel_id.get_attribute("data-hotelid"))
 ```
 
-* Once all the listed hotel's url are collected, a method named `hotel_details` is used to get the following information from each hotel's page:
+* Once all the listed hotel's url are collected, a method named `hotel_details` is used to get the following information from each hotel's details page:
   * Unique listing ID
   * Name of the hotel
   * Rating of the hotel
@@ -168,3 +168,67 @@ if __name__ == "__main__":
 ```
 
 ## __Milestone 4__
+* The method named `get_picture` is usd to get all the source of the images posted on the hotel's details page. 
+
+```go
+def get_picture(self):
+        
+        time.sleep(5)
+        
+        hotel_picture_url_list = []
+        
+        see_all_pictures_button = self.driver.find_element(by = By.XPATH, value = '//*[@data-element-name = "hotel-mosaic-see-all-photos"]')
+        see_all_pictures_button.find_element(by = By.TAG_NAME, value = "button").click()
+                                                           
+        time.sleep(7)
+        
+        hotel_thumbnails = self.driver.find_elements(by = By.XPATH, value = '//*[@data-element-name = "hotel-gallery-thumbnail"]')
+        
+        for picture_number, picture in enumerate(hotel_thumbnails):
+            picture_url = picture.find_element(by = By.TAG_NAME, value = "img")    
+            picture_url = picture_url.get_attribute("src")
+            self.download_picture(picture_url,picture_number)
+            hotel_picture_url_list.append(picture_url)   
+            
+        self.hotel_dict["Hotel Pictures"].append(hotel_picture_url_list)
+        
+        return hotel_picture_url_list
+```
+
+* Once the `get_picture` method has obtained all the sources associated with the images posted on the hotel details' page, a method named `download_pictures` is used to save all the images to the image folder located within each hotel's folder in `raw data`. 
+
+```go
+def download_picture(self, picture_url, image_number):
+        image_folder_dir = f"{full_path}/images"
+        if image_number == 0 and os.path.exists(image_folder_dir):
+            shutil.rmtree(image_folder_dir)
+            os.makedirs(image_folder_dir) 
+        elif image_number == 0 and not os.path.exists(image_folder_dir):
+            os.makedirs(image_folder_dir)
+            
+        image_data = requests.get(picture_url).content
+        current_time = self.get_current_time()
+        current_date = current_time.split("T")[0]
+        current_time = current_time.split("T")[1]
+        hr, minute, seconds = current_time.split(":")
+        current_time = f"{hr}hr{minute}min{seconds}sec"
+        
+        image_dir = r"{}/{}_{}_{}".format(image_folder_dir, current_date, current_time, image_number)
+        
+        with open(image_dir + ".png","wb") as img:
+            img.write(image_data)
+```
+
+* The information obtained from each hotel's details page is stored in two dictionaries, `self.hotel_dict` and `individual_hotel_dict`.
+* The `self.hotel_dict` stores all hotel's information while `individual_hotel_dict` only stores information for the hotel it is currently scrapping and the values of the `individual_hotel_dict` dictionary is set to 0 before storing the next hotel's information. 
+* The `individual_hotel_dict` for each corresponding hotel is saved locally in a `data.json` file in the corresponding hotel folder in `raw data` 
+
+```go
+def save_data(self,current_hotel_dict):
+
+        if not os.path.exists(full_path):
+            os.makedirs(full_path)
+        
+        with open(f"{full_path}/data.json", "w") as json_file:
+            json.dump(current_hotel_dict,json_file)
+```
