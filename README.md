@@ -232,3 +232,5 @@ def save_data(self,current_hotel_dict):
         with open(f"{full_path}/data.json", "w") as json_file:
             json.dump(current_hotel_dict,json_file)
 ```
+
+## __Milestone 5__ 
