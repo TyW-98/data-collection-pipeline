@@ -174,6 +174,12 @@ class hotel_finder:
             self.hotel_list.append(hotel_link)
             self.hotel_id_list.append(hotel_id.get_attribute("data-hotelid"))
             
+    def file_path(self,hotel_name,hotel_id):
+        
+        folder_name = f"{hotel_name} (hotel ID - {hotel_id})"
+        full_path = f"{self.working_directory}/raw data/{self.holiday_location}/{folder_name}"
+        
+        return full_path
             
     def hotel_details(self):
         
@@ -186,7 +192,6 @@ class hotel_finder:
             time.sleep(6) 
             
             current_time = self.get_current_time()
-            print(type(current_time))
             self.hotel_dict["Time Scraped"].append(current_time)
             individual_hotel_dict["Time Scraped"] = current_time
             
@@ -209,10 +214,7 @@ class hotel_finder:
                 self.hotel_dict[dict_key].append(detail)
                 individual_hotel_dict[dict_key] = detail
             
-            global full_path
-            
-            folder_name = f"{hotel_name} (hotel ID - {hotel_id})"
-            full_path = f"{self.working_directory}/raw data/{self.holiday_location}/{folder_name}"
+            self.full_path = self.file_path(hotel_name,hotel_id)
             
             picture_url_list = self.get_picture()
             
@@ -228,16 +230,17 @@ class hotel_finder:
     def get_current_time(self):
         """Get current time
 
-        Get the current time and date in ISO format
+        Get the current time and date in ISO format but with microseconds replaced to 0.
 
         Returns:
+            current_time (str): the current time and date in ISO format
             
         """
         current_time = datetime.datetime.now().replace(microsecond=0).isoformat()
         
         return current_time
                  
-            
+        
     def get_picture(self):
         
         time.sleep(5)
@@ -262,7 +265,8 @@ class hotel_finder:
         return hotel_picture_url_list
           
     def download_picture(self, picture_url, image_number):
-        image_folder_dir = f"{full_path}/images"
+        
+        image_folder_dir = f"{self.full_path}/images"
         if image_number == 0 and os.path.exists(image_folder_dir):
             shutil.rmtree(image_folder_dir)
             os.makedirs(image_folder_dir) 
@@ -283,18 +287,14 @@ class hotel_finder:
 
     def save_data(self,current_hotel_dict):
 
-        if not os.path.exists(full_path):
-            os.makedirs(full_path)
+        if not os.path.exists(self.full_path):
+            os.makedirs(self.full_path)
         
-        with open(f"{full_path}/data.json", "w") as json_file:
+        with open(f"{self.full_path}/data.json", "w") as json_file:
             json.dump(current_hotel_dict,json_file)
 
     def __str__(self):
         return f"Hotel finder for {self.holiday_location}"
-    
-print(hotel_finder.__doc__)
-    
-    
     
 if __name__ == "__main__":
     destination = "Penang"
