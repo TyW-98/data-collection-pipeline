@@ -165,6 +165,10 @@ class hotel_finder:
             page_height = new_height
             
     def hotel_listing(self):
+        """Obtain all hotel listings
+
+        This functions collects the details page and unique ID of all the hotels listed in the listing page and append it it to a list.
+        """
 
         all_hotel = self.driver.find_elements(by = By.XPATH, value = '//*[@class ="PropertyCard__Link"]')
         all_hotel_id = self.driver.find_elements(by = By.XPATH, value = '//*[@data-selenium = "hotel-item"]')
@@ -175,6 +179,17 @@ class hotel_finder:
             self.hotel_id_list.append(hotel_id.get_attribute("data-hotelid"))
             
     def file_path(self,hotel_name,hotel_id):
+        """Hotel folder directory 
+
+        This function gets the hotel folder directiory using the hotel's name and its unique id.
+
+        Args:
+            hotel_name (str): the name of the hotel
+            hotel_id (int): the unique ID number associated with the hotel 
+
+        Returns:
+            str: the full working path 
+        """
         
         folder_name = f"{hotel_name} (hotel ID - {hotel_id})"
         full_path = f"{self.working_directory}/raw data/{self.holiday_location}/{folder_name}"
@@ -233,7 +248,7 @@ class hotel_finder:
         Get the current time and date in ISO format but with microseconds replaced to 0.
 
         Returns:
-            current_time (str): the current time and date in ISO format
+            str: the current time and date in ISO format
             
         """
         current_time = datetime.datetime.now().replace(microsecond=0).isoformat()
@@ -242,6 +257,14 @@ class hotel_finder:
                  
         
     def get_picture(self):
+        """Get all hotel picture's source
+
+        This function gets the source of all the hotel images posted on the hotel's
+        details' page.
+
+        Returns:
+            list: returns a list of all the hotel's images source.
+        """
         
         time.sleep(5)
         
@@ -265,6 +288,15 @@ class hotel_finder:
         return hotel_picture_url_list
           
     def download_picture(self, picture_url, image_number):
+        """download all hotel images
+
+        Download all the hotel images posted on their repesctive details page and
+        store it in their individual folders. The images will be renamed to the the following format: "<current date>_<current time>_<image number>.png"
+
+        Args:
+            picture_url (str): the source of the image
+            image_number (int): the current image index
+        """
         
         image_folder_dir = f"{self.full_path}/images"
         if image_number == 0 and os.path.exists(image_folder_dir):
@@ -286,6 +318,13 @@ class hotel_finder:
             img.write(image_data)
 
     def save_data(self,current_hotel_dict):
+        """save hotel data
+
+        Save the individual hotel data to json file.
+
+        Args:
+            current_hotel_dict (dict): contains all the current hotel information.
+        """
 
         if not os.path.exists(self.full_path):
             os.makedirs(self.full_path)
