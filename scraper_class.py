@@ -10,8 +10,22 @@ from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
 
 class hotel_finder:
+    """Hotel information retriever for agoda.com
+    
+    This class retrieves information from agoda.com using selenium webdriver together with chromedriver to control the webbrowser. 
+    
+    Args:
+        holiday_location (str): the location of the holiday destination 
+        start_date (str): the start date of the holiday using the date format dd/mm/year
+        number_of_nights (int): the number of nights planning to stay at the hotel
+        pages (int): how many pages of hotel listings to be scrape. 
+        
+    """
 
     def __init__(self,holiday_location,start_date,number_of_nights,pages):
+        """
+        see help(hotel_finder) for all th details
+        """
         self.hotel_dict = {"Hotel ID": [],"Hotel Name" : [], "Hotel Rating" : [], "Price/Night" : [], "Address": [], "Hotel URL": [],"Hotel Pictures": [],"Time Scraped": []}
         self.holiday_location = holiday_location
         self.start_date = start_date
@@ -29,6 +43,13 @@ class hotel_finder:
         self.hotel_details()
     
     def load_main_page(self):
+        """loads the main page of agoda.com
+
+        This function uses selenium webdriver to load the home page of agoda.com.
+        After loading agoda's home page it will then try to close the pop up ad
+        which always shows up everytime when visiting the page. It will also store
+        the default selected currency. 
+        """
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("start-maximized")
         self.driver = webdriver.Chrome(options = chrome_options)
@@ -44,7 +65,13 @@ class hotel_finder:
         self.currency = self.driver.find_element(by = By.XPATH, value = '//p[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 gSVfcd kite-js-Typography CurrencyContainer__SelectedCurrency__Symbol"]').text
         
     def hotel_location_search(self):
-            
+        """Search holiday destination
+        
+        This function enters the user's holiday destination into the search bar and
+        filters the listings to show hotels and resorts only.
+        """
+        time.sleep(5)    
+        
         search_bar = self.driver.find_element(by = By.XPATH, value = '//*[@class = "SearchBoxTextEditor SearchBoxTextEditor--autocomplete"]')
         search_bar.send_keys(self.holiday_location)
         
@@ -53,7 +80,7 @@ class hotel_finder:
         
         #self.set_date()
         
-        self.driver.find_element(by = By.XPATH, value = '//button[@class = "Buttonstyled__ButtonStyled-sc-5gjk6l-0 hvHHEO Box-sc-kv6pi1-0 fDMIuA"]').click()        
+        self.driver.find_element(by = By.XPATH, value = '//button[@class = "Buttonstyled__ButtonStyled-sc-5gjk6l-0 hKHQVh Box-sc-kv6pi1-0 fDMIuA"]').click()        
         time.sleep(5)
         
         # min_price_box = self.driver.find_element(by = By.XPATH, value = '//*[@id = "price_box_0"]')
@@ -107,6 +134,15 @@ class hotel_finder:
                 pass
             
     def page_scroller(self):
+        """Scroll hotel listing page
+
+        As the hotel listing page is dynamically loaded in, an infinite scroll
+        function is implemented in order to load all the hotel listings in the
+        listing page. The scroll function stores the page height in the variable
+        named page_height and new_height and this two variables will keep updated
+        as the page is being scrolled. The function will terminate when both the
+        variables is equals to each other. 
+        """
         
         page_height = self.driver.execute_script("return document.body.scrollHeight")
         
@@ -150,6 +186,7 @@ class hotel_finder:
             time.sleep(6) 
             
             current_time = self.get_current_time()
+            print(type(current_time))
             self.hotel_dict["Time Scraped"].append(current_time)
             individual_hotel_dict["Time Scraped"] = current_time
             
@@ -189,6 +226,13 @@ class hotel_finder:
             time.sleep(5)  
             
     def get_current_time(self):
+        """Get current time
+
+        Get the current time and date in ISO format
+
+        Returns:
+            
+        """
         current_time = datetime.datetime.now().replace(microsecond=0).isoformat()
         
         return current_time
@@ -248,8 +292,12 @@ class hotel_finder:
     def __str__(self):
         return f"Hotel finder for {self.holiday_location}"
     
+print(hotel_finder.__doc__)
+    
+    
+    
 if __name__ == "__main__":
-    destination = "Paris"
+    destination = "Penang"
     number_of_pages = 3
     start_date = "20/12/2022"
     number_of_nights = 4
