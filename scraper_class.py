@@ -18,11 +18,11 @@ class hotel_finder:
         holiday_location (str): the location of the holiday destination 
         start_date (str): the start date of the holiday using the date format dd/mm/year
         number_of_nights (int): the number of nights planning to stay at the hotel
-        pages (int): how many pages of hotel listings to be scrape. 
+        number_of_hotels (int): how many hotel listings to scrape 
         
     """
 
-    def __init__(self,holiday_location,start_date,number_of_nights,pages):
+    def __init__(self,holiday_location,start_date,number_of_nights,number_of_hotels):
         """
         see help(hotel_finder) for all th details
         """
@@ -30,7 +30,7 @@ class hotel_finder:
         self.holiday_location = holiday_location
         self.start_date = start_date
         self.number_of_nights = number_of_nights
-        self.pages = pages + 1
+        self.number_of_hotels = number_of_hotels + 1
         self.hotel_list = []
         self.hotel_id_list = []
         self.working_directory = os.path.dirname(os.path.realpath(__file__)).replace('\\',"/")
@@ -200,7 +200,7 @@ class hotel_finder:
         
         hotel_dict_keys = list(self.hotel_dict.keys())
         
-        for hotel_number , hotel in enumerate(self.hotel_list):
+        for hotel_number , hotel in enumerate(self.hotel_list[:self.number_of_hotels]):
             individual_hotel_dict = dict.fromkeys(hotel_dict_keys, 0)
             self.driver.get(hotel)
             hotel_page = requests.get(hotel)
@@ -214,14 +214,13 @@ class hotel_finder:
             hotel_name = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-header-name"]').text
             hotel_rating = self.driver.find_elements(by = By.XPATH, value = '//h3[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 hTkvyT kite-js-Typography "]')[0].text
             hotel_address = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-address-map"]').text
-            check_hotel_room_avaliability = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "RoomGrid-searchTimeOutText"]')
+            check_hotel_room_avaliability = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "Spanstyled__SpanStyled-sc-16tp9kb-0 gwICfd kite-js-Span pd-price PriceDisplay PriceDisplay--noPointer PriceDisplay pd-color"]')
             
             if check_hotel_room_avaliability == []:
-                hotel_price_per_night = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "Box-sc-kv6pi1-0 hRUYUu StickyNavPrice__priceDetail--lowerText StickyNavPrice__priceDetail--defaultColor"]')
-                hotel_price_per_night = hotel_price_per_night[1].text.split(self.currency)[1]
-            elif "no rooms" in check_hotel_room_avaliability[0].text:
                 hotel_price_per_night = "No rooms avaliable"
-            
+            else:
+                hotel_price_per_night = check_hotel_room_avaliability[0].find_element(by = By.XPATH, value = '//strong[@data-ppapi = "room-price"]').text
+        
             hotel_url = self.driver.current_url
             details_list = [hotel_id, hotel_name, hotel_rating, hotel_price_per_night, hotel_address, hotel_url]
             
@@ -337,11 +336,11 @@ class hotel_finder:
     
 if __name__ == "__main__":
     destination = "Penang"
-    number_of_pages = 3
+    number_of_hotels = 5
     start_date = "20/12/2022"
     number_of_nights = 4
     
-    all_hotels = hotel_finder(destination,start_date, number_of_nights ,number_of_pages)
+    all_hotels = hotel_finder(destination,start_date,number_of_nights,number_of_hotels)
     
     print(all_hotels)
     
