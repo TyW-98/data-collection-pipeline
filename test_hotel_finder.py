@@ -5,6 +5,7 @@ import hypothesis.strategies as st
 import unittest
 import time
 import datetime
+import os
 
 
 class hotelfinderTestCase(unittest.TestCase):
@@ -18,10 +19,11 @@ class hotelfinderTestCase(unittest.TestCase):
         actual_value = self.hotel.get_current_time()
         self.assertAlmostEqual(expected_value,actual_value)
         
-    def test_load_home_page(self):
-        expected_value = "https://www.agoda.com/"
-        actual_value = self.hotel.load_main_page()
-        actual_value = actual_value.getCurrentUrl()
+    def test_file_path(self):
+        working_dir = os.path.dirname(os.path.realpath(__file__)).replace("\\","/")
+        folder_name = "Test Hotel (hotel ID - 122)"
+        expected_value = f"{working_dir}/raw data/Penang/{folder_name}"
+        actual_value = self.hotel.file_path("Test Hotel",122)
         self.assertEqual(expected_value,actual_value)
         
     def tearDown(self):
