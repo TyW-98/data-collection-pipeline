@@ -336,11 +336,13 @@ class hotel_finder:
     
 if __name__ == "__main__":
     destination = "Penang"
-    number_of_hotels = 5
+    number_of_hotels = 1
     start_date = "20/12/2022"
     number_of_nights = 4
     
     all_hotels = hotel_finder(destination,start_date,number_of_nights,number_of_hotels)
+    
+    print(all_hotels.load_main_page().getCurrentUrl())
     
     print(all_hotels)
     
