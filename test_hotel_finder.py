@@ -20,7 +20,8 @@ class hotelfinderTestCase(unittest.TestCase):
         
     def test_load_home_page(self):
         expected_value = "https://www.agoda.com/"
-        actual_value = self.hotel.load_main_page().getCurrentUrl()
+        actual_value = self.hotel.load_main_page()
+        actual_value = actual_value.getCurrentUrl()
         self.assertEqual(expected_value,actual_value)
         
     def tearDown(self):

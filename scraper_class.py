@@ -30,7 +30,7 @@ class hotel_finder:
         self.holiday_location = holiday_location
         self.start_date = start_date
         self.number_of_nights = number_of_nights
-        self.number_of_hotels = number_of_hotels + 1
+        self.number_of_hotels = number_of_hotels
         self.hotel_list = []
         self.hotel_id_list = []
         self.working_directory = os.path.dirname(os.path.realpath(__file__)).replace('\\',"/")
