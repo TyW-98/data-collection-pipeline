@@ -210,16 +210,16 @@ class hotel_finder:
             self.hotel_dict["Time Scraped"].append(current_time)
             individual_hotel_dict["Time Scraped"] = current_time
             
-            hotel_id = self.hotel_id_list[hotel_number]       
+            hotel_id = int(self.hotel_id_list[hotel_number])      
             hotel_name = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-header-name"]').text
-            hotel_rating = self.driver.find_elements(by = By.XPATH, value = '//h3[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 hTkvyT kite-js-Typography "]')[0].text
+            hotel_rating = float(self.driver.find_elements(by = By.XPATH, value = '//h3[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 hTkvyT kite-js-Typography "]')[0].text)
             hotel_address = self.driver.find_element(by = By.XPATH, value = '//*[@data-selenium = "hotel-address-map"]').text
             check_hotel_room_avaliability = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "Spanstyled__SpanStyled-sc-16tp9kb-0 gwICfd kite-js-Span pd-price PriceDisplay PriceDisplay--noPointer PriceDisplay pd-color"]')
             
             if check_hotel_room_avaliability == []:
                 hotel_price_per_night = "No rooms avaliable"
             else:
-                hotel_price_per_night = check_hotel_room_avaliability[0].find_element(by = By.XPATH, value = '//strong[@data-ppapi = "room-price"]').text
+                hotel_price_per_night = float(check_hotel_room_avaliability[0].find_element(by = By.XPATH, value = '//strong[@data-ppapi = "room-price"]').text)
         
             hotel_url = self.driver.current_url
             details_list = [hotel_id, hotel_name, hotel_rating, hotel_price_per_night, hotel_address, hotel_url]
@@ -238,8 +238,13 @@ class hotel_finder:
             
             print(hotel_price_per_night)
             print(self.hotel_dict)
+            
+            for datatype in list(individual_hotel_dict.values()):
+                print(type(datatype))
     
             time.sleep(5)  
+            
+            return individual_hotel_dict
             
     def get_current_time(self):
         """Get current time
@@ -341,8 +346,6 @@ if __name__ == "__main__":
     number_of_nights = 4
     
     all_hotels = hotel_finder(destination,start_date,number_of_nights,number_of_hotels)
-    
-    print(all_hotels.load_main_page().getCurrentUrl())
     
     print(all_hotels)
     
