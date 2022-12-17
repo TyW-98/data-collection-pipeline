@@ -26,7 +26,7 @@ class hotelfinderTestCase(unittest.TestCase):
         actual_value = self.hotel.file_path("Test Hotel",122)
         self.assertEqual(expected_value,actual_value)
         
-    def test_individual_hotel_dict_keys(self):
+    def test_individual_hotel_dict(self):
         expected_value = [
             "Hotel ID",
             "Hotel Name",
@@ -37,22 +37,22 @@ class hotelfinderTestCase(unittest.TestCase):
             "Hotel Pictures",
             "Time Scraped"
         ]
-        actual_value = list(self.hotel.hotel_dict.keys())
-        self.assertListEqual(expected_value,actual_value)
-        
-    def test_individual_hotel_dict_values(self):
-        expected_value_type = [
-            int, 
-            str, 
+        expected_datatype = [
+            int,
+            str,
             float,
             float,
             str,
             str,
+            list,
             str,
         ]
-        actual_value = list(self.hotel.hotel_dict.values())
-        for n, actual_datatype in enumerate(actual_value):
-            self.assertEqual(expected_value_type[n],type(actual_datatype[0][0]))
+        actual_value = list(self.hotel.hotel_dict.keys())
+        actual_datatypes = list(self.hotel.hotel_dict.values())
+        self.assertListEqual(expected_value,actual_value)
+        
+        for n, actual_datatype in enumerate(actual_datatypes):
+            self.assertEqual(expected_datatype[n], type(actual_datatype[0]))
         
     def tearDown(self):
         
