@@ -1,9 +1,7 @@
 from scraper_class import hotel_finder
 from hypothesis import given
-from selenium import webdriver
 import hypothesis.strategies as st
 import unittest
-import time
 import datetime
 import os
 
@@ -18,12 +16,13 @@ class hotelfinderTestCase(unittest.TestCase):
         expected_value = datetime.datetime.now().replace(microsecond=0).isoformat()
         actual_value = self.hotel.get_current_time()
         self.assertAlmostEqual(expected_value,actual_value)
-        
-    def test_file_path(self):
+    
+    @given(st.integers().filter(lambda x : x >100000 and x < 1000000))
+    def test_file_path(self, n):
         working_dir = os.path.dirname(os.path.realpath(__file__)).replace("\\","/")
-        folder_name = "Test Hotel (hotel ID - 122)"
+        folder_name = f"Test Hotel (hotel ID - {n})"
         expected_value = f"{working_dir}/raw data/Penang/{folder_name}"
-        actual_value = self.hotel.file_path("Test Hotel",122)
+        actual_value = self.hotel.file_path("Test Hotel",n)
         self.assertEqual(expected_value,actual_value)
         
     def test_individual_hotel_dict(self):
@@ -53,6 +52,7 @@ class hotelfinderTestCase(unittest.TestCase):
         
         for n, actual_datatype in enumerate(actual_datatypes):
             self.assertEqual(expected_datatype[n], type(actual_datatype[0]))
+            self.assertNotEqual([],actual_datatype[0])
         
     def tearDown(self):
         
