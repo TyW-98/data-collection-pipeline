@@ -35,6 +35,7 @@ class hotel_finder:
         self.hotel_id_list = []
         self.working_directory = os.path.dirname(os.path.realpath(__file__)).replace('\\',"/")
         
+        self.select_holiday_date()
         self.load_main_page()
         self.hotel_location_search()
         self.page_scroller()
@@ -75,8 +76,8 @@ class hotel_finder:
         search_bar = self.driver.find_element(by = By.XPATH, value = '//*[@class = "SearchBoxTextEditor SearchBoxTextEditor--autocomplete"]')
         search_bar.send_keys(self.holiday_location)
         
-        #time.sleep(2.5)
-        #search_bar.send_keys(Keys.ENTER)
+        time.sleep(2.5)
+        search_bar.send_keys(Keys.ENTER)
         
         #self.set_date()
         
@@ -97,41 +98,125 @@ class hotel_finder:
         resort_tick_box.find_element(by = By.CLASS_NAME, value = "checkbox-icon").click()
         time.sleep(5)
         
-    def set_date(self) :
+    def set_holiday_dates(self):
+        selected_start_date, selected_month, selected_year = (n for n in self.start_date.split("/"))
+        number_of_days_in_start_date_month = monthrange(int(selected_year),int(selected_month))[1]
+        end_day = int(selected_start_date) + self.number_of_nights
         
-        #self.driver.find_element(by = By.XPATH, value = '//*[@class = "IconBox IconBox--checkIn"]').click()
-        time.sleep(5)
+        if number_of_days_in_start_date_month - end_day < 0:
+            end_day -= number_of_days_in_start_date_month
+            selected_month = int(selected_month) + 1
+            if selected_month == 13:
+                selected_month = 1
+                selected_year = int(selected_year) + 1
+   
+        end_date = f"{end_day}/{selected_month}/{selected_year}"
+       
+        holiday_dates = {"start of holiday": self.start_date,"end of holiday": end_date}
         
-        all_months = self.driver.find_elements(by = By.XPATH, value = '//*[@class ="DayPicker-Caption DayPicker-Caption-Wide"]')
+        return holiday_dates
+            
+    def set_date(self,date):      
+        holiday_day, holiday_month, holiday_year = date.split("/")
+        month_list = []
         
         month_dict = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6, "Jul": 7, "Aug": 8 , "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12}
         week_dict = {"Mon": 0, "Tue": 1, "Wed": 2, "Thu": 3, "Fri": 4, "Sat": 5, "Sun": 6}
         
-        selected_start_date, selected_month, selected_year = (n for n in self.start_date.split("/"))
-        selected_end_date = int(selected_start_date) + number_of_nights
-        weekday = datetime.date(year = int(selected_year), month = int(selected_month), day = int(selected_start_date)).weekday()
-        selected_month = list(month_dict.keys())[list(month_dict.values()).index(int(selected_month))]
-        weekday = list(week_dict.keys())[list(week_dict.values()).index(weekday)]
+        holiday_month = list(month_dict.keys())[list(month_dict.values()).index(int(holiday_month))]
         
-        for months in all_months:
-            current_month = months.text
-            total_number_of_days = monthrange(int(selected_year),month_dict[current_month[:3]])
-            #date_label = f"{weekday} {selected_month} {selected_start_date} {selected_year}"               
-            if selected_month == current_month[:3] and int(selected_year) == int(current_month[-4:]):
-                days_element = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "PriceSurgePicker-Day__label PriceSurgePicker-Day__label--wide"]')
-                for days in days_element[:total_number_of_days[1]-1]:
-                    print(days.text)
-                    if days.text == selected_start_date or days.text == selected_end_date:
-                        days_parent = days.find_element(by = By.XPATH, value = '..')  
-                        days_parent = days_parent.find_element(by = By.XPATH, value = '..')
-                        days_parent = days_parent.find_element(by = By.XPATH, value = '..')
-                        days_parent.click()
-                        time.sleep(15)   
-                        continue
-                    else:
-                        pass
-            else:
-                pass
+        while holiday_month not in month_list:
+            
+            #all_months = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "DayPicker-Caption DayPicker-Caption-Wide"]')        
+            all_months = ["December 2022","January 2023"]
+            
+            currently_display_months = [month.split(" ")[0][:3] for month in all_months]
+            print(currently_display_months)
+            
+            # for months in all_months:
+            #     currently_displayed_month = months.text.split(" ")[0][:3]
+            #     month_list.append(currently_displayed_month)
+            #     currently_displayed_year = months.text.split(" ")[1]
+                
+            #     if currently_displayed_year == holiday_year:
+            #         number_of_days_in_start_date_month = monthrange(int(holiday_year),int(holiday_month))[1]
+            #         all_days_element = self.driver.find_elements(by = By.XPATH, value = '//*[@class ="PriceSurgePicker-Day__label PriceSurgePicker-Day__label--wide"]')
+            #         all_days_element
+                    
+                    
+                
+                
+                
+                
+            
+            
+                
+    def select_holiday_date(self):
+        
+        holiday_dates = self.set_holiday_dates()
+        
+        self.set_date(holiday_dates["start of holiday"])
+            
+        
+    # def set_date(self):
+        
+    #     #self.driver.find_element(by = By.XPATH, value = '//*[@class = "IconBox IconBox--checkIn"]').click()
+    #     time.sleep(5)
+        
+       
+        
+        
+    #     selected_start_date, selected_month, selected_year = (n for n in self.start_date.split("/"))
+    #     selected_end_date = int(selected_start_date) + self.number_of_nights
+    #     weekday = datetime.date(year = int(selected_year), month = int(selected_month), day = int(selected_start_date)).weekday()
+    #     selected_month = list(month_dict.keys())[list(month_dict.values()).index(int(selected_month))]
+    #     weekday = list(week_dict.keys())[list(week_dict.values()).index(weekday)]
+    #     print(selected_month)
+    #     print(weekday)
+        
+        
+        
+    #     all_months = self.driver.find_elements(by = By.XPATH, value = '//*[@class ="DayPicker-Caption DayPicker-Caption-Wide"]')
+        
+    #     displayed_months = []  
+        
+    #     # while True:
+            
+    #     #     for month in all_months:
+    #     #         current_month, current_year = month.text.split(" ") 
+    #     #         total_number_of_days_in_the_month = monthrange(int(selected_year),month_dict[current_month[:3]])
+    #     #         print(current_month, current_year)
+    #     #         if current_month[:3] == selected_month:
+    #     #             time.sleep(2)
+    #     #             days_element = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "PriceSurgePicker-Day__label PriceSurgePicker-Day__label--wide"]')
+    #     #             for day in days_element[:total_number_of_days_in_the_month[1]-1]:
+    #     #                 if days.text == selected-start_date:
+    #     #         else:
+    #     #             self.driver.find_element(by=By.XPATH, value = '//*[@class = "DayPicker-NavButton DayPicker-NavButton--next  ficon ficon-18 ficon-edge-arrow-right"]').click()
+    #     #             all_months = self.driver.find_elements(by = By.XPATH, value = '//*[@class ="DayPicker-Caption DayPicker-Caption-Wide"]')
+    #     #             time.sleep(5)
+                        
+        
+    #     for months in all_months:
+    #         current_month = months.text
+    #         total_number_of_days = monthrange(int(selected_year),month_dict[current_month[:3]])
+    #         #date_label = f"{weekday} {selected_month} {selected_start_date} {selected_year}"               
+    #         if selected_month == current_month[:3] and int(selected_year) == int(current_month[-4:]):
+    #             days_element = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "PriceSurgePicker-Day__label PriceSurgePicker-Day__label--wide"]')
+    #             for days in days_element[:total_number_of_days[1]-1]:
+    #                 print(days.text)
+    #                 if days.text == selected_start_date or days.text == selected_end_date:
+    #                     days_parent = days.find_element(by = By.XPATH, value = '..')  
+    #                     days_parent = days_parent.find_element(by = By.XPATH, value = '..')
+    #                     days_parent = days_parent.find_element(by = By.XPATH, value = '..')
+    #                     days_parent.click()
+    #                     time.sleep(15)   
+    #                     continue
+    #                 else:
+    #                     pass
+    #         else:
+    #             pass
+    
             
     def page_scroller(self):
         """Scroll hotel listing page
@@ -236,11 +321,7 @@ class hotel_finder:
             
             self.save_data(individual_hotel_dict)
             
-            print(hotel_price_per_night)
             print(self.hotel_dict)
-            
-            for datatype in list(individual_hotel_dict.values()):
-                print(type(datatype))
     
             time.sleep(5)  
             
@@ -343,7 +424,7 @@ if __name__ == "__main__":
     destination = "Penang"
     number_of_hotels = 1
     start_date = "20/12/2022"
-    number_of_nights = 4
+    number_of_nights = 15
     
     all_hotels = hotel_finder(destination,start_date,number_of_nights,number_of_hotels)
     
