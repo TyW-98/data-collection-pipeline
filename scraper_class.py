@@ -39,7 +39,6 @@ class hotel_finder:
         self.hotel_location_search()
         self.page_scroller()
         self.hotel_listing()
-        
         self.hotel_details()
     
     def load_main_page(self):
@@ -51,7 +50,8 @@ class hotel_finder:
         the default selected currency. 
         """
         chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("start-maximized")
+        #chrome_options.add_argument("start-maximized")
+        chrome_options.add_argument("--headless")
         self.driver = webdriver.Chrome(options = chrome_options)
         self.driver.get("https://www.agoda.com/") 
         time.sleep(7)
@@ -86,10 +86,6 @@ class hotel_finder:
         
         self.driver.find_element(by = By.XPATH, value = '//button[@class = "Buttonstyled__ButtonStyled-sc-5gjk6l-0 hKHQVh Box-sc-kv6pi1-0 fDMIuA"]').click()        
         time.sleep(5)
-        
-        # min_price_box = self.driver.find_element(by = By.XPATH, value = '//*[@id = "price_box_0"]')
-        # min_price_box.send_keys("10")
-        # time.sleep(2)
         
         self.driver.find_element(by = By.XPATH, value = '//*[@class = "filter-btn more-less-btn"]').click()
         time.sleep(2.5)
@@ -245,7 +241,10 @@ class hotel_finder:
         
         hotel_dict_keys = list(self.hotel_dict.keys())
         
-        for hotel_number , hotel in enumerate(self.hotel_list[:self.number_of_hotels]):
+        if self.number_of_hotels != 99:
+            self.hotel_list = self.hotel_list[:self.number_of_hotels]
+        
+        for hotel_number , hotel in enumerate(self.hotel_list):
             individual_hotel_dict = dict.fromkeys(hotel_dict_keys, 0)
             self.driver.get(hotel)
             hotel_page = requests.get(hotel)
@@ -285,7 +284,6 @@ class hotel_finder:
     
             time.sleep(5)  
             
-            return individual_hotel_dict
             
     def get_current_time(self):
         """Get current time
@@ -382,7 +380,7 @@ class hotel_finder:
     
 if __name__ == "__main__":
     destination = "Penang"
-    number_of_hotels = 1
+    number_of_hotels = 5
     start_date = "31/12/2022"
     number_of_nights = 15
     
