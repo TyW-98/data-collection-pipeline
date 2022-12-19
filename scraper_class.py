@@ -35,7 +35,6 @@ class hotel_finder:
         self.hotel_id_list = []
         self.working_directory = os.path.dirname(os.path.realpath(__file__)).replace('\\',"/")
         
-        self.select_holiday_date()
         self.load_main_page()
         self.hotel_location_search()
         self.page_scroller()
@@ -79,7 +78,7 @@ class hotel_finder:
         time.sleep(2.5)
         search_bar.send_keys(Keys.ENTER)
         
-        #self.set_date()
+        self.select_holiday_date()
         
         self.driver.find_element(by = By.XPATH, value = '//button[@class = "Buttonstyled__ButtonStyled-sc-5gjk6l-0 hKHQVh Box-sc-kv6pi1-0 fDMIuA"]').click()        
         time.sleep(5)
@@ -117,45 +116,71 @@ class hotel_finder:
         return holiday_dates
             
     def set_date(self,date):      
-        holiday_day, holiday_month, holiday_year = date.split("/")
-        month_list = []
+        holiday_start_day, holiday_month, holiday_year = date.split("/")
         
         month_dict = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6, "Jul": 7, "Aug": 8 , "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12}
         week_dict = {"Mon": 0, "Tue": 1, "Wed": 2, "Thu": 3, "Fri": 4, "Sat": 5, "Sun": 6}
         
-        holiday_month = list(month_dict.keys())[list(month_dict.values()).index(int(holiday_month))]
+        holiday_month_str = list(month_dict.keys())[list(month_dict.values()).index(int(holiday_month))]
         
-        while holiday_month not in month_list:
+        time.sleep(2.5)
+        all_months = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "DayPicker-Caption DayPicker-Caption-Wide"]')            
+        currently_display_year = [year.text.split(" ")[1] for year in all_months]
+        currently_display_months = [month.text.split(" ")[0][:3] for month in all_months]
+        
+        print(currently_display_months ,currently_display_year)
+        
+        while holiday_month_str not in currently_display_months:
             
-            #all_months = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "DayPicker-Caption DayPicker-Caption-Wide"]')        
-            all_months = ["December 2022","January 2023"]
+            self.driver.find_element(by = By.XPATH, value = '//*[@class = "DayPicker-NavButton DayPicker-NavButton--next  ficon ficon-18 ficon-edge-arrow-right"]').click()
+            time.sleep(2.5)
             
-            currently_display_months = [month.split(" ")[0][:3] for month in all_months]
-            print(currently_display_months)
+            currently_display_months = []
+            currently_display_year = []
             
-            # for months in all_months:
-            #     currently_displayed_month = months.text.split(" ")[0][:3]
-            #     month_list.append(currently_displayed_month)
-            #     currently_displayed_year = months.text.split(" ")[1]
-                
-            #     if currently_displayed_year == holiday_year:
-            #         number_of_days_in_start_date_month = monthrange(int(holiday_year),int(holiday_month))[1]
-            #         all_days_element = self.driver.find_elements(by = By.XPATH, value = '//*[@class ="PriceSurgePicker-Day__label PriceSurgePicker-Day__label--wide"]')
-            #         all_days_element
-                    
-                    
-                
-                
-                
-                
+            all_months = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "DayPicker-Caption DayPicker-Caption-Wide"]')
+            currently_display_year = [year.text.split(" ")[1] for year in all_months]
+            currently_display_months = [month.text.split(" ")[0][:3] for month in all_months]
+        
+            # all_months = ["December 2022","January 2023"]
+            # currently_display_months = [month.split(" ")[0][:3] for month in all_months]
             
+            # print(currently_display_months)
             
+        number_of_days_in_holiday_month = monthrange(int(holiday_year),int(holiday_month))[1]
+        number_of_days_in_display_month_1 = monthrange(int(currently_display_year[0]),list(month_dict.values())[list(month_dict.keys()).index(currently_display_months[0])])[1]
+        number_of_days_in_display_month_2 = monthrange(int(currently_display_year[1]),list(month_dict.values())[list(month_dict.keys()).index(currently_display_months[1])])[1]
+        all_days_element = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "PriceSurgePicker-Day__label PriceSurgePicker-Day__label--wide"]')   
+        
+        month_position = currently_display_months.index(holiday_month_str)
+        print(month_position)
+        
+        if month_position == 0:
+            all_days_element = all_days_element[:number_of_days_in_holiday_month-1]
+        else:
+            all_days_element = all_days_element[number_of_days_in_display_month_1-1:]
+            
+        print(all_days_element)
+             
+        for days in all_days_element:
+            
+            if days.text == holiday_start_day:
+                
+                days_parent = days.find_element(by = By.XPATH, value = '..')  
+                days_parent = days_parent.find_element(by = By.XPATH, value = '..')
+                days_parent = days_parent.find_element(by = By.XPATH, value = '..')
+                days_parent.click()
+                time.sleep(10)
                 
     def select_holiday_date(self):
         
         holiday_dates = self.set_holiday_dates()
+        print(holiday_dates)
         
-        self.set_date(holiday_dates["start of holiday"])
+        for key_dates in list(holiday_dates.keys()):
+            self.set_date(holiday_dates[key_dates])
+            time.sleep(5)
+        
             
         
     # def set_date(self):
@@ -423,7 +448,7 @@ class hotel_finder:
 if __name__ == "__main__":
     destination = "Penang"
     number_of_hotels = 1
-    start_date = "20/12/2022"
+    start_date = "31/12/2022"
     number_of_nights = 15
     
     all_hotels = hotel_finder(destination,start_date,number_of_nights,number_of_hotels)
