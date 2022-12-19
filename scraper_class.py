@@ -79,6 +79,10 @@ class hotel_finder:
         search_bar.send_keys(Keys.ENTER)
         
         self.select_holiday_date()
+        time.sleep(2.5)
+        
+        search_bar.send_keys(Keys.ESCAPE)
+        time.sleep(2.5)
         
         self.driver.find_element(by = By.XPATH, value = '//button[@class = "Buttonstyled__ButtonStyled-sc-5gjk6l-0 hKHQVh Box-sc-kv6pi1-0 fDMIuA"]').click()        
         time.sleep(5)
@@ -141,11 +145,6 @@ class hotel_finder:
             all_months = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "DayPicker-Caption DayPicker-Caption-Wide"]')
             currently_display_year = [year.text.split(" ")[1] for year in all_months]
             currently_display_months = [month.text.split(" ")[0][:3] for month in all_months]
-        
-            # all_months = ["December 2022","January 2023"]
-            # currently_display_months = [month.split(" ")[0][:3] for month in all_months]
-            
-            # print(currently_display_months)
             
         number_of_days_in_holiday_month = monthrange(int(holiday_year),int(holiday_month))[1]
         number_of_days_in_display_month_1 = monthrange(int(currently_display_year[0]),list(month_dict.values())[list(month_dict.keys()).index(currently_display_months[0])])[1]
@@ -153,14 +152,11 @@ class hotel_finder:
         all_days_element = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "PriceSurgePicker-Day__label PriceSurgePicker-Day__label--wide"]')   
         
         month_position = currently_display_months.index(holiday_month_str)
-        print(month_position)
         
         if month_position == 0:
             all_days_element = all_days_element[:number_of_days_in_holiday_month-1]
         else:
             all_days_element = all_days_element[number_of_days_in_display_month_1-1:]
-            
-        print(all_days_element)
              
         for days in all_days_element:
             
@@ -170,78 +166,17 @@ class hotel_finder:
                 days_parent = days_parent.find_element(by = By.XPATH, value = '..')
                 days_parent = days_parent.find_element(by = By.XPATH, value = '..')
                 days_parent.click()
-                time.sleep(10)
+                time.sleep(2.5)
+                break
                 
     def select_holiday_date(self):
         
         holiday_dates = self.set_holiday_dates()
-        print(holiday_dates)
         
         for key_dates in list(holiday_dates.keys()):
             self.set_date(holiday_dates[key_dates])
             time.sleep(5)
         
-            
-        
-    # def set_date(self):
-        
-    #     #self.driver.find_element(by = By.XPATH, value = '//*[@class = "IconBox IconBox--checkIn"]').click()
-    #     time.sleep(5)
-        
-       
-        
-        
-    #     selected_start_date, selected_month, selected_year = (n for n in self.start_date.split("/"))
-    #     selected_end_date = int(selected_start_date) + self.number_of_nights
-    #     weekday = datetime.date(year = int(selected_year), month = int(selected_month), day = int(selected_start_date)).weekday()
-    #     selected_month = list(month_dict.keys())[list(month_dict.values()).index(int(selected_month))]
-    #     weekday = list(week_dict.keys())[list(week_dict.values()).index(weekday)]
-    #     print(selected_month)
-    #     print(weekday)
-        
-        
-        
-    #     all_months = self.driver.find_elements(by = By.XPATH, value = '//*[@class ="DayPicker-Caption DayPicker-Caption-Wide"]')
-        
-    #     displayed_months = []  
-        
-    #     # while True:
-            
-    #     #     for month in all_months:
-    #     #         current_month, current_year = month.text.split(" ") 
-    #     #         total_number_of_days_in_the_month = monthrange(int(selected_year),month_dict[current_month[:3]])
-    #     #         print(current_month, current_year)
-    #     #         if current_month[:3] == selected_month:
-    #     #             time.sleep(2)
-    #     #             days_element = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "PriceSurgePicker-Day__label PriceSurgePicker-Day__label--wide"]')
-    #     #             for day in days_element[:total_number_of_days_in_the_month[1]-1]:
-    #     #                 if days.text == selected-start_date:
-    #     #         else:
-    #     #             self.driver.find_element(by=By.XPATH, value = '//*[@class = "DayPicker-NavButton DayPicker-NavButton--next  ficon ficon-18 ficon-edge-arrow-right"]').click()
-    #     #             all_months = self.driver.find_elements(by = By.XPATH, value = '//*[@class ="DayPicker-Caption DayPicker-Caption-Wide"]')
-    #     #             time.sleep(5)
-                        
-        
-    #     for months in all_months:
-    #         current_month = months.text
-    #         total_number_of_days = monthrange(int(selected_year),month_dict[current_month[:3]])
-    #         #date_label = f"{weekday} {selected_month} {selected_start_date} {selected_year}"               
-    #         if selected_month == current_month[:3] and int(selected_year) == int(current_month[-4:]):
-    #             days_element = self.driver.find_elements(by = By.XPATH, value = '//*[@class = "PriceSurgePicker-Day__label PriceSurgePicker-Day__label--wide"]')
-    #             for days in days_element[:total_number_of_days[1]-1]:
-    #                 print(days.text)
-    #                 if days.text == selected_start_date or days.text == selected_end_date:
-    #                     days_parent = days.find_element(by = By.XPATH, value = '..')  
-    #                     days_parent = days_parent.find_element(by = By.XPATH, value = '..')
-    #                     days_parent = days_parent.find_element(by = By.XPATH, value = '..')
-    #                     days_parent.click()
-    #                     time.sleep(15)   
-    #                     continue
-    #                 else:
-    #                     pass
-    #         else:
-    #             pass
-    
             
     def page_scroller(self):
         """Scroll hotel listing page
