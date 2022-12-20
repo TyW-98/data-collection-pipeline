@@ -65,10 +65,10 @@ class hotel_finder:
         self.currency = self.driver.find_element(by = By.XPATH, value = '//p[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 gSVfcd kite-js-Typography CurrencyContainer__SelectedCurrency__Symbol"]').text
         
     def hotel_location_search(self):
-        """Search holiday destination
+        """Search holiday destination, select holiday dates and filter listings
         
-        This function enters the user's holiday destination into the search bar and
-        filters the listings to show hotels and resorts only.
+        This function enters the user's holiday destination into the search bar
+        ,selects the start and end date of the holiday and filters the listings to show hotels and resorts only.
         """
         time.sleep(5)    
         
@@ -98,6 +98,16 @@ class hotel_finder:
         time.sleep(5)
         
     def set_holiday_dates(self):
+        """Set holiday start and end date
+
+        This function calculates the end date of the holiday using the start date
+        of the holiday and the number of nights spent in the hotel then return it in dd/mm/yyyy format.
+
+        Returns:
+           dict {str: str}: This dictionary contains the start and end dates of
+           the holiday.
+        """
+        
         selected_start_date, selected_month, selected_year = (n for n in self.start_date.split("/"))
         number_of_days_in_start_date_month = monthrange(int(selected_year),int(selected_month))[1]
         end_day = int(selected_start_date) + self.number_of_nights
@@ -115,7 +125,15 @@ class hotel_finder:
         
         return holiday_dates
             
-    def set_date(self,date):      
+    def set_date(self,date): 
+        """Select holiday dates on agoda calender.
+
+        This function selects the booking date on agoda's calender. 
+
+        Args:
+            date (str): Hotel booking date in the following format: dd/mm/yyyy
+        """
+        
         holiday_start_day, holiday_month, holiday_year = date.split("/")
         
         month_dict = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6, "Jul": 7, "Aug": 8 , "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12}
@@ -166,6 +184,12 @@ class hotel_finder:
                 break
                 
     def select_holiday_date(self):
+        """ Select start and end date of booking
+
+        This function uses the set_holiday_dates method to calculate the end date
+        of the booking then uses the set_date method to select the start and end 
+        date of the booking in agoda's website.
+        """
         
         holiday_dates = self.set_holiday_dates()
         
@@ -238,6 +262,25 @@ class hotel_finder:
         return full_path
             
     def hotel_details(self):
+        """ Gather individual hotel informations   
+
+        This function gets the hotel information from their each respective pages.
+        The information includes:
+        
+        - Hotel's name
+        - Unique listing ID
+        - Hotel rating
+        - Price per night
+        - Hotel's address
+        - Hotel's page URL
+        - Hotel's pictures sources
+        - Time scraped. 
+        
+        To scrape all hotels in the listing pages, the number of hotels must be set to 99 or else the scraper will only scrape the number of hotels defined by the user. 
+        
+        Returns:
+            dict: Contains all the information for each respective hotels
+        """
         
         hotel_dict_keys = list(self.hotel_dict.keys())
         
@@ -282,8 +325,9 @@ class hotel_finder:
             
             print(self.hotel_dict)
     
-            time.sleep(5)  
+            time.sleep(5) 
             
+        return individual_hotel_dict 
             
     def get_current_time(self):
         """Get current time
