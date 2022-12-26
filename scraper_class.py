@@ -425,7 +425,7 @@ class hotel_finder:
 if __name__ == "__main__":
     destination = "Penang"
     number_of_hotels = 5
-    start_date = "31/12/2022"
+    start_date = "15/01/2023"
     number_of_nights = 15
     
     all_hotels = hotel_finder(destination,start_date,number_of_nights,number_of_hotels)
