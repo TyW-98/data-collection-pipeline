@@ -49,7 +49,7 @@ class hotel_finder:
         which always shows up everytime when visiting the page. It will also store
         the default selected currency. 
         """
-        chrome_options = webdriver.ChromeOptions()
+        chrome_options = webdriver.Remote('http://127.0.0.1:4444/wd/hub')
         #chrome_options.add_argument("start-maximized")
         chrome_options.add_argument("--headless")
         self.driver = webdriver.Chrome(options = chrome_options)
