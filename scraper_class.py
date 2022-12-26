@@ -8,6 +8,7 @@ from calendar import monthrange
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 class hotel_finder:
     """Hotel information retriever for agoda.com
@@ -52,6 +53,9 @@ class hotel_finder:
         chrome_options = webdriver.ChromeOptions()
         #chrome_options.add_argument("start-maximized")
         chrome_options.add_argument("--headless")
+        chrome_options.add_argument('--disable-gpu')
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("window-size=1920,1080") 
         self.driver = webdriver.Chrome(options = chrome_options)
         self.driver.get("https://www.agoda.com/") 
         time.sleep(7)
@@ -62,7 +66,7 @@ class hotel_finder:
         except:
             pass
         
-        self.currency = self.driver.find_element(by = By.XPATH, value = '//p[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 gSVfcd kite-js-Typography CurrencyContainer__SelectedCurrency__Symbol"]').text
+        #self.currency = self.driver.find_element(by = By.XPATH, value = '//p[@class = "Typographystyled__TypographyStyled-sc-j18mtu-0 gSVfcd kite-js-Typography CurrencyContainer__SelectedCurrency__Symbol"]').text
         
     def hotel_location_search(self):
         """Search holiday destination, select holiday dates and filter listings
