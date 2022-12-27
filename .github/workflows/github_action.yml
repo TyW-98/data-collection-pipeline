@@ -35,6 +35,6 @@ jobs:
       with:
         context: .
         push: true
-        tags: wey1998/app:latest
+        tags: wey1998/hotel_scraper:latest
 
       
