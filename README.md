@@ -1,5 +1,9 @@
 # Data Collection Pipeline
-This project uses Selenium and beautifulSoup to develop a hotel_finder class to automate the process of finding and scaping hotel information from Agoda.com. This class is particularly useful for anyone planning a holiday and looking for hotel options in a specific location. The class will retrieve a set number of hotels' name, rating, price per night, address, its agoda associated URL, picutres of the hotel and the time it was scraped. 
+Web scraping has become increasingly popular as businesses and indivudals seek to gather data from websites. This project focuses on developing a web scraper using Python and `Selenium` library for [Agoda.com](https://agoda.com/), a popular hotel booking website. The scraper is designed to automate the process of finding and extracting hotel information from the booking website, making it particularly used for anyone planning a holiday and looking for hotel options in a specific destination. 
+
+The scraper developed is capable of several features, such as data scraping, navigating through the website, selecting the correct destination and dates as well as image scraping. To ensure the reliability of the scraper, a set of unit tests were developed using `unittest` module and the `hypothesis` library. THis helped identify and fix any bugs in the codebase. Additionally, for the scraper to be portable and easy to deploy, the scraper was containersed using Docker, by creating a Docker image from a Dockerfile that includes all the necessary dependencies needed to run the scraper. 
+
+Lastly, a continuous integration and continuous deployment (CI/CD) pipeline were set up to automate the building and pushing of the Docker image to DockerHub whenever there is a push to the main branch of the repository. This ensures that the latest version of the scraper is always available for deployment.
 
 ## Dependencies
 * Python 3.x
@@ -1108,7 +1112,7 @@ class hotelfinderTestCase(unittest.TestCase):
     ```
 
 ## Conclusion
-In this project, a web scraper was developed using Python and Selenium. The web scraper can navigates through the hotel booking website, extract information of the hotels and save it to a JSON file. It is also able to scrape images of the hotel and save them locally. To ensure the reliability of the code, a set of unit tests were developed using `unittest` module and `hypothesis` library.  This helped us identify and fix any bugs in our codebase. 
+In this project, a web scraper was developed using Python and Selenium. The web scraper can navigates through the hotel booking website, extract information of the hotels and save it to a JSON file. It is also able to scrape images of the hotel and save them locally. To ensure the reliability of the code, a set of unit tests were developed using `unittest` module and `hypothesis` library.  This helped us identify and fix any bugs in the codebase. 
 
 In order for the scraper to be portable and easy to deploy, the scraper was containerised using Docker. This is done by creating a Dockerfile to build a Docker image that includes all the dependencies needed to run the scraper. Lastly, a continous integration and continous deployment (CI/CD) pipeline that automatically builds and push the Docker image to DockerHub whenever there is a push to the main branch of the repository was setup, where the Docker login details are securely stored using Github Secrets. 
 
