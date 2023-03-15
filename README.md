@@ -57,6 +57,9 @@ To use the hotel finder class, follow the following steps:
     ```console
     docker stop hotel_scraper
     ```
+## Contributing
+Contributions to this scraper are welcome. Feel free to open a pull request or submit an issue if you have any suggestions or improvements to make.
+
 ## **hotel_finder class**
 
 ```python
